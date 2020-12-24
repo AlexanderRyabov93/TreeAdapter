@@ -5,17 +5,20 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import ru.alexapps.treeview.exceptions.RemoveRootNodeException;
 import ru.alexapps.treeview.model.TreeNode;
 import ru.alexapps.treeview.exceptions.NodeNotFoundException;
 
 public class Tree<T extends TreeNode> {
     List<T> mNodes;
 
-    public Tree() {
-        this(new ArrayList<>());
+    public Tree(@NonNull T rootNode) {
+        this(Collections.singletonList(rootNode));
     }
 
     public Tree(@NonNull List<T> nodes) {
@@ -30,7 +33,7 @@ public class Tree<T extends TreeNode> {
     }
 
     public static <T extends TreeNode> boolean isTreeValid(@NonNull List<T> nodes) {
-        if (nodes.size() == 0) return true;
+        if (nodes.size() == 0) return false;
         List<? extends TreeNode> sortedNodes = sortByLft(nodes);
         //Node with min lft is root
         TreeNode rootNode = sortedNodes.get(0);
@@ -38,6 +41,7 @@ public class Tree<T extends TreeNode> {
         if (rootNode.getLft() != 0) return false;
 
         for (TreeNode node : nodes) {
+            if(node.getLft() == node.getRgt()) return false;
             final int descendantsSize = getDescendants(nodes, node.getLft(), node.getRgt()).size();
             int expectedSize = (node.getRgt() - node.getLft() - 1) / 2;
             if (descendantsSize != expectedSize) return false;
@@ -164,6 +168,10 @@ public class Tree<T extends TreeNode> {
         T currentNode = getNodeByLftRgt(lft, rgt);
         if (currentNode == null)
             throw new NodeNotFoundException(lft, rgt);
+        T root = getRoot();
+        if(lft == root.getLft() && rgt == root.getRgt()) {
+            throw new RemoveRootNodeException();
+        }
         List<T> deleted = getDescendants(currentNode);
         deleted.add(currentNode);
         mNodes.removeAll(deleted);
@@ -179,6 +187,17 @@ public class Tree<T extends TreeNode> {
             }
         }
         return new TreeUpdate<>(new ArrayList<>(), updated, deleted);
+    }
+
+    /**
+     * Adds node to tree
+     * @param node the node to add
+     * @param parent the parent node
+     * @return TreeUpdated object with changes in tree
+     * @see TreeUpdate
+     */
+    public TreeUpdate<T> addNode(@NonNull T node, @NonNull T parent) {
+        return addNode(node, parent.getLft(), parent.getRgt(), 0);
     }
 
     /**
@@ -220,6 +239,7 @@ public class Tree<T extends TreeNode> {
         return new TreeUpdate<>(inserted, updated, new ArrayList<>());
     }
 
+
     public TreeUpdate<T> setExpanded(int lft, int rgt, boolean value) {
         T node = getNodeByLftRgt(lft, rgt);
         if(node == null) throw new NodeNotFoundException(lft, rgt);
@@ -233,6 +253,14 @@ public class Tree<T extends TreeNode> {
 
     public int size() {
         return mNodes.size();
+    }
+
+    /**
+     * Returns root node of the tree
+     * @return Returns root node of the tree
+     */
+    public T getRoot() {
+        return mNodes.get(0);
     }
 
 

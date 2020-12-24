@@ -6,12 +6,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ru.alexapps.treeview.exceptions.NodeNotFoundException;
-import ru.alexapps.treeview.utils.testutils.TestUtils;
+import ru.alexapps.treeview.exceptions.RemoveRootNodeException;
 
 import static org.junit.Assert.*;
 import static ru.alexapps.treeview.utils.testutils.TestUtils.*;
 
 public class TreeTest {
+
+    @Test(expected = IllegalStateException.class)
+    public void constructorTest_root_node_should_throw_exception() {
+        new Tree<>(new TestTreeNode(0, 0));
+}
+    @Test
+    public void constructorTest_root_node_should_create_valid_tree() {
+        Tree<TestTreeNode> tree = new Tree<>(new TestTreeNode(0, 1));
+        assertEquals(1, tree.size());
+    }
 
     @Test
     public void sortByLft_should_return_correctList() {
@@ -41,8 +51,8 @@ public class TreeTest {
     }
 
     @Test
-    public void isTreeValid_should_return_true_tree_empty() {
-        assertTrue(Tree.isTreeValid(new ArrayList<>()));
+    public void isTreeValid_should_return_false_tree_empty() {
+        assertFalse(Tree.isTreeValid(new ArrayList<>()));
     }
 
     @Test
@@ -173,14 +183,13 @@ public class TreeTest {
         //No node with such indexes
         tree.deleteNode(-1,-1);
     }
-    @Test
-    public void deleteNode_should_delete_all() {
+    @Test(expected = RemoveRootNodeException.class)
+    public void deleteNode_should_throw_exception() {
         List<TestTreeNode> nodes = prepareTestData(new int[]{2, 1});
         Tree<TestTreeNode> tree = new Tree<>(nodes);
-        Tree.TreeUpdate<TestTreeNode> treeUpdate = tree.deleteNode(0, 7);
-        assertEquals(nodes.size(),treeUpdate.deleted.size());
-        assertEquals(0,treeUpdate.updated.size());
-        assertEquals(0, treeUpdate.inserted.size());
+        //Try to remove root node
+        tree.deleteNode(0, 7);
+
     }
     @Test
     public void deleteNode_should_delete_2_nodes_and_update_others() {
@@ -266,6 +275,12 @@ public class TreeTest {
         assertEquals(new TestTreeNode(5, 8), treeUpdate.updated.get(1));
         assertEquals(1, treeUpdate.inserted.size());
         assertEquals(new TestTreeNode(6, 7), treeUpdate.inserted.get(0));
+    }
+    @Test
+    public void getRoot_should_return_correct_node() {
+        List<TestTreeNode> nodes = prepareTestData(new int[]{2, 1});
+        Tree<TestTreeNode> tree = new Tree<>(nodes);
+        assertEquals(new TestTreeNode(0, 7), tree.getRoot());
     }
 
 

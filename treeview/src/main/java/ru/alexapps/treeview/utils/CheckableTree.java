@@ -11,8 +11,8 @@ import ru.alexapps.treeview.model.CheckableTreeNode;
 
 public class CheckableTree<T extends CheckableTreeNode> extends Tree<T> {
 
-    public CheckableTree() {
-        super();
+    public CheckableTree(T rootNode) {
+        super(rootNode);
     }
 
     public CheckableTree(@NonNull List<T> nodes) {
