@@ -393,6 +393,22 @@ public class TreeTest {
                 },
                 tree.mNodes.toArray());
     }
+    @Test
+    public void moveNode_move_to_empty_group() {
+        List<TestNodeWithId> nodes = prepareTestData(new int[]{2}, (lft, rgt) -> new TestNodeWithId(lft, lft, rgt));
+        nodes = Tree.sortByLft(nodes);
+        Tree<TestNodeWithId> tree = new Tree<>(nodes);
+        TestNodeWithId nodeToMove = nodes.get(1);
+        Tree.TreeUpdate<TestNodeWithId> result = tree.moveNode(nodeToMove,nodes.get(2), 0);
+        assertEquals(2, result.updated.size());
+        assertArrayEquals(
+                new TestNodeWithId[]{
+                        new TestNodeWithId(0, 0, 5),
+                        new TestNodeWithId(3, 1, 4),
+                        new TestNodeWithId(1, 2, 3)
+                },
+                tree.mNodes.toArray());
+    }
     @Test(expected = IllegalArgumentException.class)
     public void moveNode_move_inside_itself_should_throw_exception() {
         List<TestNodeWithId> nodes = prepareTestData(new int[]{2}, (lft, rgt) -> new TestNodeWithId(lft, lft, rgt));

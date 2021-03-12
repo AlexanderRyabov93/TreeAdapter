@@ -292,7 +292,7 @@ public class Tree<T extends TreeNode> {
         }
         int newLft;
         if (newIndex == 0) {
-            newLft = newParentChildren.get(newIndex).getLft();
+            newLft = newParent.getLft() + 1;
         } else {
             newLft = newParentChildren.get(newIndex - 1).getRgt() + 1;
         }
