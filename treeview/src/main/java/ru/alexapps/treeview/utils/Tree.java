@@ -7,7 +7,9 @@ import androidx.annotation.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import ru.alexapps.treeview.exceptions.RemoveRootNodeException;
@@ -41,7 +43,7 @@ public class Tree<T extends TreeNode> {
         if (rootNode.getLft() != 0) return false;
 
         for (TreeNode node : nodes) {
-            if(node.getLft() == node.getRgt()) return false;
+            if (node.getLft() == node.getRgt()) return false;
             final int descendantsSize = getDescendants(nodes, node.getLft(), node.getRgt()).size();
             int expectedSize = (node.getRgt() - node.getLft() - 1) / 2;
             if (descendantsSize != expectedSize) return false;
@@ -95,6 +97,7 @@ public class Tree<T extends TreeNode> {
 
     /**
      * Returns depth of node  with specified indexes
+     *
      * @param lft the lft index
      * @param rgt the rgt index
      * @return depth of node
@@ -105,10 +108,10 @@ public class Tree<T extends TreeNode> {
 
     /**
      * Returns List of ancestors of node with specified indexes
+     *
      * @param lft the lft index
      * @param rgt the rgt index
      * @return Returns List of ancestors
-     *
      */
     public List<T> getAncestors(int lft, int rgt) {
         T currentNode = getNodeByLftRgt(lft, rgt);
@@ -121,6 +124,7 @@ public class Tree<T extends TreeNode> {
 
     /**
      * Returns parent of node with specified indexes. If tree has not node with such lft and rgt throws IllegalArgumentException
+     *
      * @param lft the lft index
      * @param rgt the rgt index
      * @return Returns parent of node with specified indexes, or null, if node has no parent (in case of root node)
@@ -134,11 +138,12 @@ public class Tree<T extends TreeNode> {
         //Go down through array because it is sorted by lft, and parents lft is always less then child lft
         for (int i = index - 1; i >= 0; i--) {
             T node = mNodes.get(i);
-            if(node.getLft() < lft && node.getRgt() > rgt)
+            if (node.getLft() < lft && node.getRgt() > rgt)
                 return node;
         }
         return null;
     }
+
     public List<T> getChildren(int lft, int rgt) {
         T currentNode = getNodeByLftRgt(lft, rgt);
         if (currentNode == null)
@@ -147,7 +152,7 @@ public class Tree<T extends TreeNode> {
         List<T> descendants = getDescendants(lft, rgt);
         List<T> children = new ArrayList<>();
         int skipCount;
-        for(int i=0; i<descendants.size(); i+=skipCount) {
+        for (int i = 0; i < descendants.size(); i += skipCount) {
             //First descendant is child
             T descendant = descendants.get(i);
             //Number of child descendants + 1
@@ -159,6 +164,7 @@ public class Tree<T extends TreeNode> {
 
     /**
      * Removes a node and all of its descendants. Updates indexes in tree after it
+     *
      * @param lft the lft index of the node to remove
      * @param rgt the rgt index of the node to remove
      * @return TreeUpdated object with changes in tree (deleted and updated nodes)
@@ -169,7 +175,7 @@ public class Tree<T extends TreeNode> {
         if (currentNode == null)
             throw new NodeNotFoundException(lft, rgt);
         T root = getRoot();
-        if(lft == root.getLft() && rgt == root.getRgt()) {
+        if (lft == root.getLft() && rgt == root.getRgt()) {
             throw new RemoveRootNodeException();
         }
         List<T> deleted = getDescendants(currentNode);
@@ -177,10 +183,10 @@ public class Tree<T extends TreeNode> {
         mNodes.removeAll(deleted);
         List<T> updated = new ArrayList<>();
         final int decrement = deleted.size() * 2;
-        for(T node: mNodes) {
-            if(node.getRgt() > rgt) {
+        for (T node : mNodes) {
+            if (node.getRgt() > rgt) {
                 node.setRgt(node.getRgt() - decrement);
-                if(node.getLft() > lft) {
+                if (node.getLft() > lft) {
                     node.setLft(node.getLft() - decrement);
                 }
                 updated.add(node);
@@ -191,7 +197,8 @@ public class Tree<T extends TreeNode> {
 
     /**
      * Adds node to tree
-     * @param node the node to add
+     *
+     * @param node   the node to add
      * @param parent the parent node
      * @return TreeUpdated object with changes in tree
      * @see TreeUpdate
@@ -202,9 +209,10 @@ public class Tree<T extends TreeNode> {
 
     /**
      * Adds node to tree on specified position.
-     * @param node the node to add
-     * @param parentLft the lft index of the parent node
-     * @param parentRgt the rgt index of the parent node
+     *
+     * @param node              the node to add
+     * @param parentLft         the lft index of the parent node
+     * @param parentRgt         the rgt index of the parent node
      * @param indexInsideParent position inside parent (0 - first child)
      * @return TreeUpdated object with changes in tree
      * @see TreeUpdate
@@ -215,16 +223,16 @@ public class Tree<T extends TreeNode> {
             throw new NodeNotFoundException(parentLft, parentRgt);
         int nodeLft = parentRgt;
         List<T> children = getChildren(parentLft, parentRgt);
-        if(indexInsideParent < 0 || indexInsideParent > children.size())
+        if (indexInsideParent < 0 || indexInsideParent > children.size())
             throw new IllegalArgumentException("Wrong indexInsideParent = " + indexInsideParent + " total children: " + children.size());
-        if(indexInsideParent < children.size()) {
+        if (indexInsideParent < children.size()) {
             nodeLft = children.get(indexInsideParent).getLft();
         }
         List<T> updated = new ArrayList<>();
-        for(T treeNode : mNodes) {
-            if(treeNode.getRgt() >= nodeLft) {
+        for (T treeNode : mNodes) {
+            if (treeNode.getRgt() >= nodeLft) {
                 treeNode.setRgt(treeNode.getRgt() + 2);
-                if(treeNode.getLft() >= nodeLft) {
+                if (treeNode.getLft() >= nodeLft) {
                     treeNode.setLft(treeNode.getLft() + 2);
                 }
                 updated.add(treeNode);
@@ -242,9 +250,9 @@ public class Tree<T extends TreeNode> {
 
     public TreeUpdate<T> setExpanded(int lft, int rgt, boolean value) {
         T node = getNodeByLftRgt(lft, rgt);
-        if(node == null) throw new NodeNotFoundException(lft, rgt);
+        if (node == null) throw new NodeNotFoundException(lft, rgt);
         List<T> updated = new ArrayList<>(1);
-        if(node.isExpanded() != value) {
+        if (node.isExpanded() != value) {
             node.setExpanded(value);
             updated.add(node);
         }
@@ -257,12 +265,75 @@ public class Tree<T extends TreeNode> {
 
     /**
      * Returns root node of the tree
+     *
      * @return Returns root node of the tree
      */
     public T getRoot() {
         return mNodes.get(0);
     }
 
+    /**
+     * Moves node and all its descendants inside specified parent at specified index
+     * @param node node to move
+     * @param newParent new parent of node
+     * @param newIndex index inside parent node (from 0 to parent node children array size)
+     * @return TreeUpdated object with changes in tree
+     * @see TreeUpdate
+     */
+    public TreeUpdate<T> moveNode(T node, T newParent, int newIndex) {
+        if (node.getLft() == newParent.getLft() && node.getRgt() == newParent.getRgt()) {
+            throw new IllegalArgumentException("You are trying to move node inside itself");
+        }
+        int oldLft = node.getLft();
+        int oldRgt = node.getRgt();
+        List<T> newParentChildren = getChildren(newParent.getLft(), newParent.getRgt());
+        if (newIndex < 0 || newIndex > newParentChildren.size()) {
+            throw new IllegalArgumentException("Illegal new index. Children size = " + newParentChildren.size());
+        }
+        int newLft;
+        if (newIndex == 0) {
+            newLft = newParentChildren.get(newIndex).getLft();
+        } else {
+            newLft = newParentChildren.get(newIndex - 1).getRgt() + 1;
+        }
+        int movedTreeWidth = node.getRgt() - node.getLft() + 1;
+        int moveDistance = newLft - node.getLft();
+        int tmppos = node.getLft();
+        if (moveDistance < 0) {
+            moveDistance -= movedTreeWidth;
+            tmppos += movedTreeWidth;
+        }
+
+        List<T> updated = new ArrayList<>();
+        for (T nodeFromArray : mNodes) {
+            int lftBefore = nodeFromArray.getLft();
+            int rgtBefore = nodeFromArray.getRgt();
+            //create new space for subtree
+            if (nodeFromArray.getLft() >= newLft) {
+                nodeFromArray.setLft(nodeFromArray.getLft() + movedTreeWidth);
+            }
+            if (nodeFromArray.getRgt() >= newLft) {
+                nodeFromArray.setRgt(nodeFromArray.getRgt() + movedTreeWidth);
+            }
+            //move subtree into new space
+            if (nodeFromArray.getLft() >= tmppos && nodeFromArray.getRgt() < tmppos + movedTreeWidth) {
+                nodeFromArray.setRgt(nodeFromArray.getRgt() + moveDistance);
+                nodeFromArray.setLft(nodeFromArray.getLft() + moveDistance);
+            }
+            //remove old space vacated by subtree
+            if (nodeFromArray.getLft() > oldRgt) {
+                nodeFromArray.setLft(nodeFromArray.getLft() - movedTreeWidth);
+            }
+            if (nodeFromArray.getRgt() > oldRgt) {
+                nodeFromArray.setRgt(nodeFromArray.getRgt() - movedTreeWidth);
+            }
+            if (lftBefore != nodeFromArray.getLft() || rgtBefore != nodeFromArray.getRgt()) {
+                updated.add(nodeFromArray);
+            }
+        }
+        mNodes = sortByLft(mNodes);
+        return new TreeUpdate<>(new ArrayList<>(), updated, new ArrayList<>());
+    }
 
     /**
      * Finds all descendants of node with specified lft an rgt
@@ -293,11 +364,10 @@ public class Tree<T extends TreeNode> {
         public final List<T> deleted;
 
         public TreeUpdate(@NonNull List<T> inserted, @NonNull List<T> updated, @NonNull List<T> deleted) {
-            this.inserted =  inserted;
+            this.inserted = inserted;
             this.updated = updated;
             this.deleted = deleted;
         }
-
 
 
     }

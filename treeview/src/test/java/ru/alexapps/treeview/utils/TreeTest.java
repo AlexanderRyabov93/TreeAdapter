@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import ru.alexapps.treeview.exceptions.NodeNotFoundException;
 import ru.alexapps.treeview.exceptions.RemoveRootNodeException;
@@ -16,7 +17,8 @@ public class TreeTest {
     @Test(expected = IllegalStateException.class)
     public void constructorTest_root_node_should_throw_exception() {
         new Tree<>(new TestTreeNode(0, 0));
-}
+    }
+
     @Test
     public void constructorTest_root_node_should_create_valid_tree() {
         Tree<TestTreeNode> tree = new Tree<>(new TestTreeNode(0, 1));
@@ -108,81 +110,93 @@ public class TreeTest {
         List<TestTreeNode> visibleNodes = tree.getVisibleNodes();
         assertEquals(2 + 5 + 2 + 1, visibleNodes.size());
     }
+
     @Test
     public void getNodeByLftRgt_should_return_null() {
         List<TestTreeNode> nodes = prepareTestData(new int[]{});
         Tree<TestTreeNode> tree = new Tree<>(nodes);
         assertNull(tree.getNodeByLftRgt(1, 2));
     }
+
     @Test
     public void getNodeByLftRgt_should_return_node() {
         List<TestTreeNode> nodes = prepareTestData(new int[]{});
         Tree<TestTreeNode> tree = new Tree<>(nodes);
         assertEquals(nodes.get(0), tree.getNodeByLftRgt(0, 1));
     }
+
     @Test(expected = IllegalArgumentException.class)
     public void getParent_should_throw_exception_wrong_args() {
         List<TestTreeNode> nodes = prepareTestData(new int[]{});
         Tree<TestTreeNode> tree = new Tree<>(nodes);
         //No node with such indexes
-        tree.getParent(1,2);
+        tree.getParent(1, 2);
     }
+
     @Test
     public void getParent_should_return_null() {
         List<TestTreeNode> nodes = prepareTestData(new int[]{});
         Tree<TestTreeNode> tree = new Tree<>(nodes);
         //Rot node hasn't parent
-        assertNull(tree.getParent(0,1));
+        assertNull(tree.getParent(0, 1));
     }
+
     @Test
     public void getParent_should_return_root() {
         List<TestTreeNode> nodes = prepareTestData(new int[]{1, 1});
         Tree<TestTreeNode> tree = new Tree<>(nodes);
-        assertEquals(nodes.get(nodes.size() - 1), tree.getParent(1,4));
+        assertEquals(nodes.get(nodes.size() - 1), tree.getParent(1, 4));
     }
+
     @Test
     public void getParent_should_return_second_node() {
         List<TestTreeNode> nodes = prepareTestData(new int[]{1, 1});
         Tree<TestTreeNode> tree = new Tree<>(nodes);
-        assertEquals(nodes.get(1), tree.getParent(2,3));
+        assertEquals(nodes.get(1), tree.getParent(2, 3));
     }
+
     @Test(expected = IllegalArgumentException.class)
     public void getAncestors_should_throw_exception() {
         List<TestTreeNode> nodes = prepareTestData(new int[]{2, 1});
         Tree<TestTreeNode> tree = new Tree<>(nodes);
         //No node with such indexes
-        tree.getAncestors(-1,-1);
+        tree.getAncestors(-1, -1);
     }
+
     @Test
     public void getAncestors_should_return_empty_list() {
         List<TestTreeNode> nodes = prepareTestData(new int[]{2, 1});
         Tree<TestTreeNode> tree = new Tree<>(nodes);
         //Rot node hasn't ancestors
-        assertEquals(0, tree.getAncestors(0,7).size());
+        assertEquals(0, tree.getAncestors(0, 7).size());
     }
+
     @Test
     public void getAncestors_should_return_list_with_one_item() {
         List<TestTreeNode> nodes = prepareTestData(new int[]{2, 1});
         Tree<TestTreeNode> tree = new Tree<>(nodes);
-        List<TestTreeNode> ancestors = tree.getAncestors(1,4);
+        List<TestTreeNode> ancestors = tree.getAncestors(1, 4);
         assertEquals(1, ancestors.size());
         assertEquals(nodes.get(nodes.size() - 1), ancestors.get(0));
     }
+
     @Test
     public void getAncestors_should_return_list_with_two_items() {
         List<TestTreeNode> nodes = prepareTestData(new int[]{2, 1});
         Tree<TestTreeNode> tree = new Tree<>(nodes);
-        List<TestTreeNode> ancestors = tree.getAncestors(2,3);
+        List<TestTreeNode> ancestors = tree.getAncestors(2, 3);
         assertEquals(2, ancestors.size());
         assertEquals(nodes.get(nodes.size() - 1), ancestors.get(0));
     }
+
     @Test(expected = NodeNotFoundException.class)
     public void deleteNode_shouldThrowException() {
         List<TestTreeNode> nodes = prepareTestData(new int[]{2, 1});
         Tree<TestTreeNode> tree = new Tree<>(nodes);
         //No node with such indexes
-        tree.deleteNode(-1,-1);
+        tree.deleteNode(-1, -1);
     }
+
     @Test(expected = RemoveRootNodeException.class)
     public void deleteNode_should_throw_exception() {
         List<TestTreeNode> nodes = prepareTestData(new int[]{2, 1});
@@ -191,54 +205,61 @@ public class TreeTest {
         tree.deleteNode(0, 7);
 
     }
+
     @Test
     public void deleteNode_should_delete_2_nodes_and_update_others() {
         List<TestTreeNode> nodes = prepareTestData(new int[]{2, 1});
         Tree<TestTreeNode> tree = new Tree<>(nodes);
         Tree.TreeUpdate<TestTreeNode> treeUpdate = tree.deleteNode(1, 4);
         assertEquals(0, treeUpdate.inserted.size());
-        assertEquals(2,treeUpdate.deleted.size());
+        assertEquals(2, treeUpdate.deleted.size());
         assertEquals(new TestTreeNode(2, 3), treeUpdate.deleted.get(0));
         assertEquals(new TestTreeNode(1, 4), treeUpdate.deleted.get(1));
         assertEquals(2, treeUpdate.updated.size());
-        assertEquals(new TestTreeNode(0,3), treeUpdate.updated.get(0));
-        assertEquals(new TestTreeNode(1,2), treeUpdate.updated.get(1));
+        assertEquals(new TestTreeNode(0, 3), treeUpdate.updated.get(0));
+        assertEquals(new TestTreeNode(1, 2), treeUpdate.updated.get(1));
     }
+
     @Test(expected = NodeNotFoundException.class)
     public void getChildren_should_throw_exception() {
         List<TestTreeNode> nodes = prepareTestData(new int[]{2, 1});
         Tree<TestTreeNode> tree = new Tree<>(nodes);
         tree.getChildren(-1, -1);
     }
+
     @Test
     public void getChildren_should_return_2_nodes() {
         List<TestTreeNode> nodes = prepareTestData(new int[]{2, 1});
         Tree<TestTreeNode> tree = new Tree<>(nodes);
         List<TestTreeNode> children = tree.getChildren(0, 7);
         assertEquals(2, children.size());
-        assertEquals(new TestTreeNode(1,4), children.get(0));
-        assertEquals(new TestTreeNode(5,6), children.get(1));
+        assertEquals(new TestTreeNode(1, 4), children.get(0));
+        assertEquals(new TestTreeNode(5, 6), children.get(1));
     }
+
     @Test
     public void getChildren_should_return_1_node() {
         List<TestTreeNode> nodes = prepareTestData(new int[]{2, 1});
         Tree<TestTreeNode> tree = new Tree<>(nodes);
         List<TestTreeNode> children = tree.getChildren(1, 4);
         assertEquals(1, children.size());
-        assertEquals(new TestTreeNode(2,3), children.get(0));
+        assertEquals(new TestTreeNode(2, 3), children.get(0));
     }
+
     @Test(expected = NodeNotFoundException.class)
     public void addNode_should_throw_exception_node_not_found() {
         List<TestTreeNode> nodes = prepareTestData(new int[]{2, 1});
         Tree<TestTreeNode> tree = new Tree<>(nodes);
         tree.addNode(new TestTreeNode(0, 0), -1, -1, 0);
     }
+
     @Test(expected = IllegalArgumentException.class)
     public void addNode_should_throw_exception_invalid_index() {
         List<TestTreeNode> nodes = prepareTestData(new int[]{2, 1});
         Tree<TestTreeNode> tree = new Tree<>(nodes);
         tree.addNode(new TestTreeNode(0, 0), 0, 7, -1);
     }
+
     @Test
     public void add_node_last_child_of_root() {
         List<TestTreeNode> nodes = prepareTestData(new int[]{2, 1});
@@ -250,6 +271,7 @@ public class TreeTest {
         assertEquals(1, treeUpdate.inserted.size());
         assertEquals(new TestTreeNode(7, 8), treeUpdate.inserted.get(0));
     }
+
     @Test
     public void add_node_first_child_of_root() {
         List<TestTreeNode> nodes = prepareTestData(new int[]{2, 1});
@@ -264,6 +286,7 @@ public class TreeTest {
         assertEquals(1, treeUpdate.inserted.size());
         assertEquals(new TestTreeNode(1, 2), treeUpdate.inserted.get(0));
     }
+
     @Test
     public void add_node_to_empty_parent() {
         List<TestTreeNode> nodes = prepareTestData(new int[]{2, 1});
@@ -276,6 +299,7 @@ public class TreeTest {
         assertEquals(1, treeUpdate.inserted.size());
         assertEquals(new TestTreeNode(6, 7), treeUpdate.inserted.get(0));
     }
+
     @Test
     public void getRoot_should_return_correct_node() {
         List<TestTreeNode> nodes = prepareTestData(new int[]{2, 1});
@@ -283,6 +307,142 @@ public class TreeTest {
         assertEquals(new TestTreeNode(0, 7), tree.getRoot());
     }
 
+    @Test
+    public void moveNode_move_two_nodes_in_root() {
+        List<TestNodeWithId> nodes = prepareTestData(new int[]{2}, (lft, rgt) -> new TestNodeWithId(lft, lft, rgt));
+        nodes = Tree.sortByLft(nodes);
+        Tree<TestNodeWithId> tree = new Tree<>(nodes);
+        TestNodeWithId nodeToMove = nodes.get(1);
+        Tree.TreeUpdate<TestNodeWithId> result = tree.moveNode(nodeToMove, tree.getRoot(), 2);
+        assertEquals(2, result.updated.size());
+        assertArrayEquals(
+                new TestNodeWithId[]{
+                        new TestNodeWithId(0, 0, 5),
+                        new TestNodeWithId(3, 1, 2),
+                        new TestNodeWithId(1, 3, 4)
+                },
+                tree.mNodes.toArray());
+    }
+    @Test
+    public void moveNode_move_node_with_child() {
+        List<TestNodeWithId> nodes = prepareTestData(new int[]{2, 1}, (lft, rgt) -> new TestNodeWithId(lft, lft, rgt));
+        nodes = Tree.sortByLft(nodes);
+        Tree<TestNodeWithId> tree = new Tree<>(nodes);
+        TestNodeWithId nodeWithChild = nodes.get(1);
+        Tree.TreeUpdate<TestNodeWithId> result = tree.moveNode(nodeWithChild, tree.getRoot(), 2);
+        assertEquals(3, result.updated.size());
+        assertArrayEquals(
+                new TestNodeWithId[]{
+                        new TestNodeWithId(0, 0, 7),
+                        new TestNodeWithId(5, 1, 2),
+                        new TestNodeWithId(1, 3, 6),
+                        new TestNodeWithId(2, 4, 5)
+                },
+                tree.mNodes.toArray());
+    }
+    @Test
+    public void moveNode_move_second_node_inside_first() {
+        List<TestNodeWithId> nodes = prepareTestData(new int[]{2, 1}, (lft, rgt) -> new TestNodeWithId(lft, lft, rgt));
+        nodes = Tree.sortByLft(nodes);
+        Tree<TestNodeWithId> tree = new Tree<>(nodes);
+        TestNodeWithId nodeWithChild = nodes.get(1);
+        TestNodeWithId nodeToMove = nodes.get(3);
+        Tree.TreeUpdate<TestNodeWithId> result = tree.moveNode(nodeToMove, nodeWithChild, 0);
+        assertEquals(3, result.updated.size());
+        assertArrayEquals(
+                new TestNodeWithId[]{
+                        new TestNodeWithId(0, 0, 7),
+                        new TestNodeWithId(1, 1, 6),
+                        new TestNodeWithId(5, 2, 3),
+                        new TestNodeWithId(2, 4, 5)
+                },
+                tree.mNodes.toArray());
+    }
+    @Test
+    public void moveNode_move_second_node_with_child_inside_first() {
+        List<TestNodeWithId> nodes = prepareTestData(new int[]{2, 1, 1}, (lft, rgt) -> new TestNodeWithId(lft, lft, rgt));
+        nodes = Tree.sortByLft(nodes);
+        Tree<TestNodeWithId> tree = new Tree<>(nodes);
+        TestNodeWithId nodeWithChild = nodes.get(1);
+        TestNodeWithId nodeToMove = nodes.get(3);
+        Tree.TreeUpdate<TestNodeWithId> result = tree.moveNode(nodeToMove, nodeWithChild, 0);
+        assertEquals(4, result.updated.size());
+        assertArrayEquals(
+                new TestNodeWithId[]{
+                        new TestNodeWithId(0, 0, 9),
+                        new TestNodeWithId(1, 1, 8),
+                        new TestNodeWithId(5, 2, 5),
+                        new TestNodeWithId(6, 3, 4),
+                        new TestNodeWithId(2, 6, 7)
+                },
+                tree.mNodes.toArray());
+    }
+    @Test
+    public void moveNode_move_to_the_same_position_should_change_nothing() {
+        List<TestNodeWithId> nodes = prepareTestData(new int[]{2}, (lft, rgt) -> new TestNodeWithId(lft, lft, rgt));
+        nodes = Tree.sortByLft(nodes);
+        Tree<TestNodeWithId> tree = new Tree<>(nodes);
+        TestNodeWithId nodeToMove = nodes.get(1);
+        Tree.TreeUpdate<TestNodeWithId> result = tree.moveNode(nodeToMove, tree.getRoot(), 0);
+        assertEquals(0, result.updated.size());
+        assertArrayEquals(
+                new TestNodeWithId[]{
+                        new TestNodeWithId(0, 0, 5),
+                        new TestNodeWithId(1, 1, 2),
+                        new TestNodeWithId(3, 3, 4)
+                },
+                tree.mNodes.toArray());
+    }
+    @Test(expected = IllegalArgumentException.class)
+    public void moveNode_move_inside_itself_should_throw_exception() {
+        List<TestNodeWithId> nodes = prepareTestData(new int[]{2}, (lft, rgt) -> new TestNodeWithId(lft, lft, rgt));
+        nodes = Tree.sortByLft(nodes);
+        Tree<TestNodeWithId> tree = new Tree<>(nodes);
+        TestNodeWithId nodeToMove = nodes.get(1);
+        tree.moveNode(nodeToMove, nodeToMove, 0);
+    }
+    @Test(expected = IllegalArgumentException.class)
+    public void moveNode_move_to_negative_index_should_throw_exception() {
+        List<TestNodeWithId> nodes = prepareTestData(new int[]{2}, (lft, rgt) -> new TestNodeWithId(lft, lft, rgt));
+        nodes = Tree.sortByLft(nodes);
+        Tree<TestNodeWithId> tree = new Tree<>(nodes);
+        TestNodeWithId nodeToMove = nodes.get(1);
+        tree.moveNode(nodeToMove, tree.getRoot(), -1);
+    }
+    @Test(expected = IllegalArgumentException.class)
+    public void moveNode_move_to_index_out_of_children_size_should_throw_exception() {
+        List<TestNodeWithId> nodes = prepareTestData(new int[]{2}, (lft, rgt) -> new TestNodeWithId(lft, lft, rgt));
+        nodes = Tree.sortByLft(nodes);
+        Tree<TestNodeWithId> tree = new Tree<>(nodes);
+        TestNodeWithId nodeToMove = nodes.get(1);
+        TestNodeWithId root = tree.getRoot();
+        int childrenSize = tree.getChildren(root.getLft(), root.getRgt()).size();
+        tree.moveNode(nodeToMove, root, childrenSize + 1);
+    }
 
+
+}
+
+class TestNodeWithId extends TestTreeNode {
+    final int id;
+
+    public TestNodeWithId(int id, int lft, int rgt) {
+        super(lft, rgt);
+        this.id = id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TestNodeWithId)) return false;
+        if (!super.equals(o)) return false;
+        TestNodeWithId that = (TestNodeWithId) o;
+        return id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), id);
+    }
 }
 
